@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  market-data-mcp evaluation suite — 8 deterministic checks.
+  Structural answers are baked into the code (never drift).
+  Live answers verified against Finnhub on 2026-06-14 (re-verify if market facts change).
+  Run: PYTHONUTF8=1 python evals/run_evals.py
+-->
+<evals>
+
+  <eval id="1">
+    <tool>market_quote</tool>
+    <question>Does market_quote return a positive price float for AAPL?</question>
+    <expected_answer>yes — price > 0.0</expected_answer>
+    <notes>quote.fetch('AAPL').data['price'] > 0. AAPL is always listed. Core trust check.</notes>
+  </eval>
+
+  <eval id="2">
+    <tool>market_quote</tool>
+    <question>How does market_quote handle a completely fake ticker like 'XXXX_FAKE'?</question>
+    <expected_answer>returns ok=False with "no price data" — never returns price=0 as a real quote</expected_answer>
+    <notes>Finnhub returns c=0 for unknown symbols. quote.py catches this and returns Result.failed.
+    This is the #1 trust guarantee: zero-price = no data, not a fabricated quote.</notes>
+  </eval>
+
+  <eval id="3">
+    <tool>market_news</tool>
+    <question>How many headlines does market_news return at most for a company?</question>
+    <expected_answer>5</expected_answer>
+    <notes>news.py: top = articles[:_MAX_ITEMS] where _MAX_ITEMS = 5.</notes>
+  </eval>
+
+  <eval id="4">
+    <tool>market_news</tool>
+    <question>What does market_news return when called with no symbol?</question>
+    <expected_answer>general market news headlines (category = "general market news")</expected_answer>
+    <notes>news.fetch(None) hits /news?category=general. The data['category'] field reflects this.</notes>
+  </eval>
+
+  <eval id="5">
+    <tool>market_scan</tool>
+    <question>Are the results from market_scan sorted by absolute % change, largest first?</question>
+    <expected_answer>yes — movers list is sorted by abs(change_pct) descending</expected_answer>
+    <notes>scan.py: movers.sort(key=lambda x: abs(x['change_pct']), reverse=True). Structural.</notes>
+  </eval>
+
+  <eval id="6">
+    <tool>market_scan</tool>
+    <question>What is the maximum number of symbols market_scan will accept?</question>
+    <expected_answer>25</expected_answer>
+    <notes>scan.py: tickers = tickers[:_MAX_SYMBOLS] where _MAX_SYMBOLS = 25.</notes>
+  </eval>
+
+  <eval id="7">
+    <tool>market_analyze</tool>
+    <question>What action does market_analyze recommend for a stock with a score of +50?</question>
+    <expected_answer>ACCUMULATE (verdict: "Lean positive")</expected_answer>
+    <notes>analyze.py _verdict: score >= 15 and < 40 -> ("Lean positive", "ACCUMULATE").
+    Score of +50 maps to ±5% * 100 scale = +2.5% intraday move → score = +50.</notes>
+  </eval>
+
+  <eval id="8">
+    <tool>broker_positions</tool>
+    <question>What does broker_positions return when Alpaca keys are not configured?</question>
+    <expected_answer>ok=False with "ALPACA_API_KEY / ALPACA_SECRET_KEY not set" message — never crashes</expected_answer>
+    <notes>broker.py: if not api_key or not secret_key -> Result.failed("broker", "...not set...").
+    Optional source: graceful degradation is the designed behavior, not an error.</notes>
+  </eval>
+
+</evals>
