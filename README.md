@@ -1,5 +1,8 @@
 # market-data-mcp
 
+![market-data-mcp - quote + verdict demo](docs/demo.png)
+
+
 **Real-time market data: quotes, news, earnings calendar, and a watchlist scanner for AI agents — backed by Finnhub.**
 
 Gives any MCP client (Claude Desktop, Claude Code, agents) clean, uniform market data tools
