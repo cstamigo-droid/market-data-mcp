@@ -49,14 +49,18 @@ market_analyze AAPL:
   Signal: Lean negative  [......##|........] -30/100  confidence 60%
   AAPL: $291.13  -1.52%  → Lean negative [TRIM]
   Catalyst: Apple's iOS 27 surprise could change the AI narrative
+
 ```
 
 ---
 
 ## Quick start
 
+> **Note:** the `market-data-mcp` package on PyPI is a different, unrelated
+> project by another author. Install this one from source:
+
 ```bash
-git clone <your-repo-url> market-data-mcp
+git clone https://github.com/cstamigo-droid/market-data-mcp.git
 cd market-data-mcp
 python -m venv .venv
 .venv\Scripts\activate        # Windows

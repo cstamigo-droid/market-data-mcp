@@ -33,8 +33,8 @@ def _pull(api_key: str, secret_key: str) -> list[dict]:
 
 
 def fetch() -> Result:
-    api_key = os.getenv("ALPACA_API_KEY", "")
-    secret_key = os.getenv("ALPACA_SECRET_KEY", "")
+    api_key = os.getenv("ALPACA_API_KEY", "").strip()
+    secret_key = os.getenv("ALPACA_SECRET_KEY", "").strip()
     if not api_key or not secret_key:
         return Result.failed(
             "broker",

@@ -7,6 +7,9 @@ the gauge rendering in `formatting.py`.
 """
 from __future__ import annotations
 
+import os
+import re
+
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -49,4 +52,30 @@ class Result:
         Returns ok=False with no score, so a composite tool can simply skip it
         and the agent sees an honest "no data".
         """
-        return cls(source=source, ok=False, summary=f"no data ({error})", error=error)
+        safe = redact(error)
+        return cls(source=source, ok=False, summary=f"no data ({safe})", error=safe)
+
+
+_SECRET_ENV = ("FINNHUB_API_KEY", "ALPACA_API_KEY", "ALPACA_SECRET_KEY")
+_SECRET_QS = re.compile(
+    r"((?:token|api[-_]?key|apikey|key|secret)=)[^&\s\'\"]+", re.I
+)
+
+
+def redact(text: object) -> str:
+    """Strip credentials out of any text before it reaches the agent.
+
+    Two things used to put the key in front of the model: `requests` embeds the
+    request URL in its HTTPError message (the key travelled there as `token=`),
+    and urllib3 echoes a header value back when it rejects it -- which happens
+    for a key copy-pasted with a trailing newline. Keys now travel in a header
+    and are stripped at the source; this stays as a backstop, and covers the
+    escaped forms a repr() would produce.
+    """
+    out = str(text)
+    for name in _SECRET_ENV:
+        raw = os.getenv(name, "")
+        for value in (raw, raw.strip(), repr(raw)[1:-1], repr(raw.strip())[1:-1]):
+            if len(value) >= 8:
+                out = out.replace(value, "***REDACTED***")
+    return _SECRET_QS.sub(r"\1***REDACTED***", out)

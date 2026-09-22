@@ -25,7 +25,8 @@ def _pull_company(symbol: str, key: str) -> list[dict]:
     to = today.isoformat()
     resp = requests.get(
         f"{_BASE}/company-news",
-        params={"symbol": symbol, "from": frm, "to": to, "token": key},
+        params={"symbol": symbol, "from": frm, "to": to},
+        headers={"X-Finnhub-Token": key},
         timeout=10,
     )
     resp.raise_for_status()
@@ -35,7 +36,8 @@ def _pull_company(symbol: str, key: str) -> list[dict]:
 def _pull_general(key: str) -> list[dict]:
     resp = requests.get(
         f"{_BASE}/news",
-        params={"category": "general", "token": key},
+        params={"category": "general"},
+        headers={"X-Finnhub-Token": key},
         timeout=10,
     )
     resp.raise_for_status()
@@ -52,7 +54,7 @@ def _fmt_ts(ts: int | None) -> str:
 
 
 def fetch(symbol: str | None = None) -> Result:
-    key = os.getenv("FINNHUB_API_KEY", "")
+    key = os.getenv("FINNHUB_API_KEY", "").strip()
     if not key:
         return Result.failed("news", "FINNHUB_API_KEY not set")
 

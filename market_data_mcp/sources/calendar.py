@@ -22,7 +22,8 @@ _TTL_S = 1800.0  # 30 min — calendar changes infrequently
 def _pull(frm: str, to: str, key: str) -> dict:
     resp = requests.get(
         _URL,
-        params={"from": frm, "to": to, "token": key},
+        params={"from": frm, "to": to},
+        headers={"X-Finnhub-Token": key},
         timeout=10,
     )
     # 403 = premium-gated, raise so we catch it above
@@ -31,7 +32,7 @@ def _pull(frm: str, to: str, key: str) -> dict:
 
 
 def fetch(days: int = 7) -> Result:
-    key = os.getenv("FINNHUB_API_KEY", "")
+    key = os.getenv("FINNHUB_API_KEY", "").strip()
     if not key:
         return Result.failed("calendar", "FINNHUB_API_KEY not set")
 

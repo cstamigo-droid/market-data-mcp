@@ -20,7 +20,8 @@ _TTL_S = 60.0  # quotes age fast
 def _pull(symbol: str, key: str) -> dict:
     resp = requests.get(
         _URL,
-        params={"symbol": symbol, "token": key},
+        params={"symbol": symbol},
+        headers={"X-Finnhub-Token": key},
         timeout=10,
     )
     resp.raise_for_status()
@@ -29,7 +30,7 @@ def _pull(symbol: str, key: str) -> dict:
 
 def fetch(symbol: str) -> Result:
     t = symbol.upper().strip()
-    key = os.getenv("FINNHUB_API_KEY", "")
+    key = os.getenv("FINNHUB_API_KEY", "").strip()
     if not key:
         return Result.failed("quote", "FINNHUB_API_KEY not set")
     try:

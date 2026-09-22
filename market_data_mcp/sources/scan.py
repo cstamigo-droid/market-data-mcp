@@ -23,7 +23,8 @@ _MAX_SYMBOLS = 25
 def _pull_one(symbol: str, key: str) -> dict:
     resp = requests.get(
         _URL,
-        params={"symbol": symbol, "token": key},
+        params={"symbol": symbol},
+        headers={"X-Finnhub-Token": key},
         timeout=10,
     )
     resp.raise_for_status()
@@ -37,7 +38,7 @@ def _parse_symbols(symbols: Union[list, str]) -> list[str]:
 
 
 def fetch(symbols: Union[list, str]) -> Result:
-    key = os.getenv("FINNHUB_API_KEY", "")
+    key = os.getenv("FINNHUB_API_KEY", "").strip()
     if not key:
         return Result.failed("scan", "FINNHUB_API_KEY not set")
 
