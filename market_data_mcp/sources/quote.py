@@ -20,7 +20,8 @@ _TTL_S = 60.0  # quotes age fast
 def _pull(symbol: str, key: str) -> dict:
     resp = requests.get(
         _URL,
-        params={"symbol": symbol, "token": key},
+        params={"symbol": symbol},
+        headers={"X-Finnhub-Token": key},
         timeout=10,
     )
     resp.raise_for_status()
